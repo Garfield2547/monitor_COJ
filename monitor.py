@@ -5,7 +5,7 @@ import time
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
-URL = "https://op.coj.go.th/th/content/category/articles/id/10/cid/21"
+URL = "https://script.google.com/macros/s/AKfycby_1zg8lA6V3nROK31DOmPoUWVsFHlzGGzAe5gLDR6C7pAFhFp2So5-mI4ujqh_kkU/exec"
 FILE_NAME = "last_update.txt"
 
 def send_telegram(message):
