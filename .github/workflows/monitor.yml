@@ -2,18 +2,22 @@ name: Website Telegram Monitor
 
 on:
   schedule:
-    - cron: '0 */5 * * *' # รันทุกๆ 5 ชั่วโมง
-  workflow_dispatch:      # ปุ่มสำหรับกดรันเองเพื่อทดสอบ
+    - cron: '0 */5 * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write         # สำคัญ: เพื่อให้บอท Commit ไฟล์ last_update.txt กลับเข้าคลังได้
+  contents: write
 
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # แก้เรื่อง Warning Node.js
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # ดึงประวัติมาทั้งหมดเพื่อป้องกัน Error 128
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -22,7 +26,7 @@ jobs:
 
       - name: Install Libraries
         run: |
-          pip install -r requirements.txt
+          pip install requests beautifulsoup4
 
       - name: Run Script
         env:
@@ -34,5 +38,15 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions Bot"
+          
+          # ตรวจสอบว่าไฟล์มีอยู่จริงไหม ถ้าไม่มีให้สร้าง
+          touch last_update.txt
+          
           git add last_update.txt
-          git diff-index --quiet HEAD || (git commit -m "Update last state" && git push)
+          # เช็คว่ามีการเปลี่ยนแปลงไหม ถ้ามีค่อย Commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Auto-update last state [skip ci]"
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
